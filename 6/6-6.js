@@ -2,16 +2,12 @@
 const canvas = document.getElementById("stage");
 const ctx = canvas.getContext("2d");
 
-// 調整する数（ここだけを変えて試す）
-const CONFIG = {
-  GRAVITY: 2000,
-  JUMP_SPEED: 700,
-  MOVE_SPEED: 240,
-  MAX_JUMPS: 2,
-  FALL_GRAVITY_RATE: 2,
-};
+const GRAVITY = 2000;
+const JUMP_SPEED = 700;
+const MOVE_SPEED = 240;
 
-const TARGET_HEIGHT = 64; // 目印の線の高さ（床から64px）
+const MAX_JUMPS = 2;          // 地面を離れてから跳べる回数（2段ジャンプ）
+const FALL_GRAVITY_RATE = 2;  // 落ちるときは、重力を何倍にするか
 
 const player = {
   x: 80,
@@ -20,15 +16,10 @@ const player = {
   h: 32,
   vy: 0,
   isGrounded: false,
-  jumpsLeft: CONFIG.MAX_JUMPS
+  jumpsLeft: MAX_JUMPS
 };
 
-const floor = {
-  x: 0,
-  y: 320,
-  w: 640,
-  h: 40
-};
+const floor = { x: 0, y: 320, w: 640, h: 40 };
 
 const keys = {};
 
@@ -37,7 +28,7 @@ document.addEventListener("keydown", (e) => {
 
   // 跳べる回数が残っていれば跳ぶ（空中でも）
   if (e.code === "Space" && player.jumpsLeft > 0) {
-    player.vy = -CONFIG.JUMP_SPEED;
+    player.vy = -JUMP_SPEED;
     player.jumpsLeft = player.jumpsLeft - 1;
   }
 });
@@ -51,7 +42,7 @@ function collideWithFloor() {
     player.y = floor.y - player.h;
     player.vy = 0;
     player.isGrounded = true;
-    player.jumpsLeft = CONFIG.MAX_JUMPS;
+    player.jumpsLeft = MAX_JUMPS; // 着地したら、跳べる回数を元に戻す
   } else {
     player.isGrounded = false;
   }
@@ -59,19 +50,17 @@ function collideWithFloor() {
 
 function update(dt) {
   if (keys["ArrowRight"]) {
-    player.x = player.x + CONFIG.MOVE_SPEED * dt;
+    player.x = player.x + MOVE_SPEED * dt;
   }
 
   if (keys["ArrowLeft"]) {
-    player.x = player.x - CONFIG.MOVE_SPEED * dt;
+    player.x = player.x - MOVE_SPEED * dt;
   }
 
-  // 落ちているとき（vyが＋）だけ、重力を強くする
-  const g = player.vy > 0
-    ? CONFIG.GRAVITY * CONFIG.FALL_GRAVITY_RATE
-    : CONFIG.GRAVITY;
-
+  // 落ちているとき（vy が＋）だけ、重力を強くする
+  const g = player.vy > 0 ? GRAVITY * FALL_GRAVITY_RATE : GRAVITY;
   player.vy = player.vy + g * dt;
+
   player.y = player.y + player.vy * dt;
 
   collideWithFloor();
@@ -80,19 +69,12 @@ function update(dt) {
 function draw() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  // 床
   ctx.fillStyle = "#203060";
   ctx.fillRect(floor.x, floor.y, floor.w, floor.h);
 
-  // 目印の赤い線
-  ctx.fillStyle = "#ff6b6b";
-  ctx.fillRect(0, floor.y - TARGET_HEIGHT, canvas.width, 2);
-
-  // プレイヤー
   ctx.fillStyle = player.isGrounded ? "#7ef5e1" : "#ffd166";
   ctx.fillRect(player.x, player.y, player.w, player.h);
 
-  // 情報表示
   ctx.fillStyle = "#e8eeff";
   ctx.font = "14px monospace";
   ctx.fillText(
@@ -107,7 +89,6 @@ let last = performance.now();
 
 function loop(now) {
   const dt = Math.min((now - last) / 1000, 0.033);
-
   last = now;
 
   update(dt);

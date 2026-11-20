@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>アロー関数とイベント</title>
+
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      padding: 30px;
+    }
+
+    button {
+      padding: 12px 30px;
+      margin: 10px;
+      font-size: 18px;
+      cursor: pointer;
+    }
+
+    #msg {
+      color: blue;
+      font-weight: bold;
+    }
+  </style>
+</head>
+
+<body>
+  <h2>メッセージ：<span id="msg">-</span></h2>
+
+  <button id="btnA">ボタンA</button>
+  <button id="btnB">ボタンB</button>
+
+  <script>
+    const msg = document.getElementById("msg");
+    const btnA = document.getElementById("btnA");
+    const btnB = document.getElementById("btnB");
+
+    // 無名関数（名前のない関数）
+    btnA.addEventListener("click", function () {
+      msg.innerText = "Aが押された";
+    });
+
+    // アロー関数（同じ意味の短い書き方）
+    btnB.addEventListener("click", (e) => {
+      msg.innerText = "Bが押された";
+
+      console.log(e.type);    // イベントの種類
+      console.log(e.clientX); // クリックした位置の横方向の座標
+    });
+  </script>
+</body>
+</html>

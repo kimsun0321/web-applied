@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>状態を変数で持つ</title>
+</head>
+
+<body>
+  <h2>スイッチ：<span id="status">OFF</span></h2>
+
+  <button id="toggleBtn">切り替え</button>
+
+  <script>
+    // 今の状態（最初はOFF）
+    let isOn = false;
+
+    const statusText = document.getElementById("status");
+    const button = document.getElementById("toggleBtn");
+
+    button.addEventListener("click", function () {
+      if (isOn === false) {
+        isOn = true;
+        statusText.innerText = "ON";
+      } else {
+        isOn = false;
+        statusText.innerText = "OFF";
+      }
+    });
+  </script>
+</body>
+</html>

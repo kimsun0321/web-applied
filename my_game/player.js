@@ -1,12 +1,11 @@
-// プレイヤー：決まった数・今の値・キー・動き・描き方
+// プレイヤーの設定
 
 const GRAVITY = 2000;
 const JUMP_SPEED = 700;
 const MOVE_SPEED = 240;
 const MAX_JUMPS = 2;
-const FALL_GRAVITY_RATE = 2;
 
-// HPと無敵時間
+// 課題の数値変更
 const MAX_HP = 4;
 const HIT_TIME = 1.5;
 
@@ -34,7 +33,6 @@ playerImg.src = "7-3_bird.png";
 const FRAME_SIZE = 32;
 const FRAME_TIME = 0.12;
 
-// アニメーション設定
 const ANIMS = {
   idle: { row: 0, count: 2 },
   run:  { row: 1, count: 4 },
@@ -42,29 +40,41 @@ const ANIMS = {
   fall: { row: 3, count: 2 }
 };
 
+// キー入力の状態
 const keys = {};
 
-// キー入力
+// キーを押したとき
 document.addEventListener("keydown", (e) => {
+  if (
+    e.code === "ArrowLeft" ||
+    e.code === "ArrowRight" ||
+    e.code === "Space"
+  ) {
+    e.preventDefault();
+  }
+
   keys[e.code] = true;
 
-  if (e.code === "Space") {
-    e.preventDefault();
-
-    if (gameState === "playing" && player.jumpsLeft > 0) {
-      player.vy = -JUMP_SPEED;
-      player.jumpsLeft = player.jumpsLeft - 1;
-    }
+  // ジャンプ
+  if (
+    e.code === "Space" &&
+    !e.repeat &&
+    gameState === "playing" &&
+    player.jumpsLeft > 0
+  ) {
+    player.vy = -JUMP_SPEED;
+    player.jumpsLeft--;
   }
 });
 
+// キーを離したとき
 document.addEventListener("keyup", (e) => {
   keys[e.code] = false;
 });
 
 // 床との衝突判定
 function collideWithFloor() {
-  if (player.y + player.h > floor.y) {
+  if (player.y + player.h >= floor.y) {
     player.y = floor.y - player.h;
     player.vy = 0;
     player.isGrounded = true;
@@ -74,7 +84,7 @@ function collideWithFloor() {
   }
 }
 
-// 状態を決める
+// プレイヤーの状態を決める
 function decideState() {
   if (!player.isGrounded) {
     if (player.vy < 0) {
@@ -90,7 +100,7 @@ function decideState() {
   return "idle";
 }
 
-// プレイヤーを動かす
+// プレイヤーを更新する
 function updatePlayer(dt) {
   player.vx = 0;
 
@@ -102,7 +112,8 @@ function updatePlayer(dt) {
     player.vx = -MOVE_SPEED;
   }
 
-  player.x = player.x + player.vx * dt;
+  // 横移動
+  player.x += player.vx * dt;
 
   // 画面外に出ないようにする
   if (player.x < 0) {
@@ -113,7 +124,7 @@ function updatePlayer(dt) {
     player.x = canvas.width - player.w;
   }
 
-  // 向きを変える
+  // 向き
   if (player.vx > 0) {
     player.facing = 1;
   }
@@ -123,17 +134,13 @@ function updatePlayer(dt) {
   }
 
   // 重力
-  const g = player.vy > 0
-    ? GRAVITY * FALL_GRAVITY_RATE
-    : GRAVITY;
+  player.vy += GRAVITY * dt;
+  player.y += player.vy * dt;
 
-  player.vy = player.vy + g * dt;
-  player.y = player.y + player.vy * dt;
-
-  // 床との衝突判定
+  // 床との衝突
   collideWithFloor();
 
-  // 状態を決める
+  // アニメーション状態
   const newState = decideState();
 
   if (newState !== player.state) {
@@ -142,8 +149,7 @@ function updatePlayer(dt) {
     player.frameTimer = 0;
   }
 
-  // アニメーション
-  player.frameTimer = player.frameTimer + dt;
+  player.frameTimer += dt;
 
   if (player.frameTimer >= FRAME_TIME) {
     player.frameIndex =
@@ -152,7 +158,7 @@ function updatePlayer(dt) {
     player.frameTimer = 0;
   }
 
-  // 無敵時間を減らす
+  // 無敵時間
   if (player.hitTimer > 0) {
     player.hitTimer = Math.max(0, player.hitTimer - dt);
   }
@@ -160,43 +166,46 @@ function updatePlayer(dt) {
 
 // プレイヤーを描く
 function drawPlayer() {
-  const sx = player.frameIndex * FRAME_SIZE;
-  const sy = ANIMS[player.state].row * FRAME_SIZE;
-
   ctx.save();
 
-  ctx.translate(
-    player.x + player.w / 2,
-    player.y + player.h / 2
-  );
-
-  ctx.scale(player.facing, 1);
-
+  // 無敵時間中は半透明
   if (player.hitTimer > 0) {
     ctx.globalAlpha = 0.4;
   }
 
-  ctx.drawImage(
-    playerImg,
-    sx,
-    sy,
-    FRAME_SIZE,
-    FRAME_SIZE,
-    -player.w / 2,
-    -player.h / 2,
-    player.w,
-    player.h
-  );
+  // 画像が読み込まれている場合
+  if (playerImg.complete && playerImg.naturalWidth > 0) {
+    const sx = player.frameIndex * FRAME_SIZE;
+    const sy = ANIMS[player.state].row * FRAME_SIZE;
+
+    ctx.translate(
+      player.x + player.w / 2,
+      player.y + player.h / 2
+    );
+
+    ctx.scale(player.facing, 1);
+
+    ctx.drawImage(
+      playerImg,
+      sx,
+      sy,
+      FRAME_SIZE,
+      FRAME_SIZE,
+      -player.w / 2,
+      -player.h / 2,
+      player.w,
+      player.h
+    );
+  } else {
+    // 画像が読み込めない場合は黄色い四角を表示
+    ctx.fillStyle = "#ffd700";
+    ctx.fillRect(player.x, player.y, player.w, player.h);
+  }
 
   ctx.restore();
 
-  // プレイヤー情報
-  ctx.fillStyle = "#e8eeff";
+  // HP表示
+  ctx.fillStyle = "white";
   ctx.font = "14px monospace";
-
-  ctx.fillText(
-    "HP = " + player.hp,
-    10,
-    20
-  );
+  ctx.fillText("HP = " + player.hp, 10, 20);
 }

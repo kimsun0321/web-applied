@@ -31,10 +31,11 @@ function resetGame() {
 
 // Enterキーで開始・再挑戦
 document.addEventListener("keydown", (e) => {
-  if (e.code === "Enter") {
-    if (gameState === "title" || gameState === "gameover") {
-      resetGame();
-    }
+  if (
+    e.code === "Enter" &&
+    (gameState === "title" || gameState === "gameover")
+  ) {
+    resetGame();
   }
 });
 
@@ -44,25 +45,23 @@ function update(dt) {
     return;
   }
 
-  survivalTime = survivalTime + dt;
+  survivalTime += dt;
 
-  // 動かす前のプレイヤーの下の辺を記録
   const prevBottom = player.y + player.h;
 
   updatePlayer(dt);
   updateEnemies(dt);
 
-  // プレイヤーと敵の衝突判定
   collideWithEnemies(prevBottom);
 
-  // HPが0になったらゲームオーバー
+  // HPが0になったら終了
   if (player.hp <= 0) {
     player.hp = 0;
     gameState = "gameover";
   }
 }
 
-// 文字を中央に表示する
+// 中央に文字を表示
 function drawCenteredMessage(message, y, size) {
   ctx.fillStyle = "white";
   ctx.font = "bold " + size + "px sans-serif";
@@ -81,14 +80,13 @@ function draw() {
     drawCenteredMessage("気づく敵ランナー", 75, 30);
     drawCenteredMessage("近づく敵を避けて生き残れ！", 115, 18);
     drawCenteredMessage("← →：移動   Space：ジャンプ", 155, 16);
-    drawCenteredMessage("Enterキーでスタート", 185, 18);
+    drawCenteredMessage("Enterキーでスタート", 190, 18);
     return;
   }
 
   drawEnemies();
   drawPlayer();
 
-  // 生存時間
   ctx.fillStyle = "white";
   ctx.font = "14px monospace";
   ctx.fillText(
@@ -118,10 +116,12 @@ function loop(now) {
   const dt = Math.min((now - last) / 1000, 0.033);
   last = now;
 
+  // 次のフレームを先に予約する
+  requestAnimationFrame(loop);
+
   update(dt);
   draw();
-
-  requestAnimationFrame(loop);
 }
 
+// ゲーム開始
 requestAnimationFrame(loop);

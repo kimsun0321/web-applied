@@ -1,9 +1,9 @@
-// ステージ：画面（canvas）と床
+// ステージ：画面と床
 
 const canvas = document.getElementById("stage");
 const ctx = canvas.getContext("2d");
 
-// 床の位置
+// 床
 const floor = {
   x: 0,
   y: 200,
@@ -11,7 +11,7 @@ const floor = {
   h: 40
 };
 
-// 床を描く
+// ステージを描く
 function drawStage() {
   ctx.fillStyle = "#203060";
   ctx.fillRect(floor.x, floor.y, floor.w, floor.h);

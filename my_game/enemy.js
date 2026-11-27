@@ -1,4 +1,4 @@
-// 敵：作る・入れる・動かす・ぶつかる・描く
+// 敵の設定
 
 // 敵を1体作る
 function createEnemy(x, vx) {
@@ -12,7 +12,7 @@ function createEnemy(x, vx) {
   };
 }
 
-// 敵をまとめて入れる配列
+// 敵の配列
 let enemies = [];
 
 // 敵を初期状態に戻す
@@ -23,7 +23,7 @@ function resetEnemies() {
   enemies.push(createEnemy(380, -120));
   enemies.push(createEnemy(540, 60));
 
-  // プレイヤーに近づくと速くなる敵
+  // プレイヤーに気づく敵
   const special = createEnemy(300, 80);
   special.type = "chase";
   special.normalSpeed = 80;
@@ -39,7 +39,7 @@ resetEnemies();
 function updateEnemies(dt) {
   for (const enemy of enemies) {
 
-    // 気づく敵はプレイヤーとの距離によって速さを変える
+    // 特殊な敵はプレイヤーとの距離で速さを変える
     if (enemy.type === "chase") {
       const dx =
         (player.x + player.w / 2) -
@@ -50,7 +50,6 @@ function updateEnemies(dt) {
         (enemy.y + enemy.h / 2);
 
       const distance = Math.sqrt(dx * dx + dy * dy);
-
       const direction = enemy.vx >= 0 ? 1 : -1;
 
       if (distance < 150) {
@@ -60,19 +59,19 @@ function updateEnemies(dt) {
       }
     }
 
-    // 敵を動かす
-    enemy.x = enemy.x + enemy.vx * dt;
+    // 敵を移動
+    enemy.x += enemy.vx * dt;
 
     // 左端で反転
     if (enemy.x < 0) {
       enemy.x = 0;
-      enemy.vx = -enemy.vx;
+      enemy.vx = Math.abs(enemy.vx);
     }
 
     // 右端で反転
     if (enemy.x + enemy.w > canvas.width) {
       enemy.x = canvas.width - enemy.w;
-      enemy.vx = -enemy.vx;
+      enemy.vx = -Math.abs(enemy.vx);
     }
   }
 }
@@ -80,23 +79,25 @@ function updateEnemies(dt) {
 // プレイヤーと敵の衝突判定
 function collideWithEnemies(prevBottom) {
   for (const enemy of enemies) {
+    if (!enemy.alive) {
+      continue;
+    }
 
-    // 上から踏んだ場合
     if (
       aabb(player, enemy) &&
       prevBottom <= enemy.y &&
       player.vy > 0
     ) {
+      // 上から踏んだ場合
       enemy.alive = false;
       player.vy = -JUMP_SPEED / 2;
-    }
-
-    // 横などからぶつかった場合
-    else if (
+      player.jumpsLeft = MAX_JUMPS;
+    } else if (
       aabb(player, enemy) &&
       player.hitTimer <= 0
     ) {
-      player.hp = player.hp - 1;
+      // 横からぶつかった場合
+      player.hp--;
       player.hitTimer = HIT_TIME;
     }
   }
@@ -108,7 +109,6 @@ function collideWithEnemies(prevBottom) {
 // 敵を描く
 function drawEnemies() {
   for (const enemy of enemies) {
-
     if (enemy.type === "chase") {
       ctx.fillStyle = "purple";
     } else {
@@ -123,7 +123,7 @@ function drawEnemies() {
     );
   }
 
-  ctx.fillStyle = "#e8eeff";
+  ctx.fillStyle = "white";
   ctx.font = "14px monospace";
   ctx.fillText("敵 = " + enemies.length, 10, 40);
 }

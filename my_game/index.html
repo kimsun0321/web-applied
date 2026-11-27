@@ -1,29 +1,38 @@
-
 <!DOCTYPE html>
 <html lang="ja">
-  <head>
-    <meta charset="UTF-8">
-    <title>my game</title>
-    <style>
-      body {
-        background-color: #0b1020;
-        color: #e8eeff;
-        font-family: sans-serif;
-      }
-      canvas {
-        background-color: #111a33;
-        border: 1px solid #8899cc;
-      }
-    </style>
-  </head>
-  <body>
-    <h1>my game</h1>
-    <canvas id="stage" width="640" height="360"></canvas>
-    <p id="info"></p>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>気づく敵ランナー</title>
 
-    <!-- 読み込む順番：使われる側が先、全体の流れが最後 -->
-    <script src="stage.js"></script>
-    <script src="player.js"></script>
-    <script src="main.js"></script>
-  </body>
+  <style>
+    body {
+      margin: 0;
+      padding: 20px;
+      background-color: #222;
+      color: white;
+      font-family: sans-serif;
+      text-align: center;
+    }
+
+    canvas {
+      display: block;
+      margin: 20px auto;
+      border: 2px solid white;
+      background-color: #87ceeb;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>気づく敵ランナー</h1>
+
+  <canvas id="stage" width="600" height="240"></canvas>
+
+  <script src="tools.js"></script>
+  <script src="stage.js"></script>
+  <script src="player.js"></script>
+  <script src="enemy.js"></script>
+  <script src="main.js"></script>
+</body>
 </html>
